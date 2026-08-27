@@ -19,14 +19,18 @@ app.get('/get_method',function(req,res){
 
     const {id,pw} = req.query;
 
-    res.json({
-        'params':{id,pw}
-    });
+    res.json({'params':{id,pw}});
 });
 
 //POST /login
 // {id:"admin",pw:"pass"}
-app.post('',function(){});
+// request 의 body 에 JSON 형태의 데이터를 받을때 (예) Axios
+app.use(express.json());
+app.post('/login',function(req,res){
+    console.log(req.body);
+    const {id,pw} = req.body;
+    res.json({'body':{id,pw}});
+});
 
 
 // 위 URL 외의 것이 왔을때 처리
