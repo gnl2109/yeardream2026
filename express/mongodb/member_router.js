@@ -1,10 +1,33 @@
 const express = require('express');
 const router = express.Router();
+const Member = require('./model');
 
 // 회원가입(/member/join)
-router.post('/join',function(req,res){
-    const param = req.body;
-    res.json({'success':true,'data':param});
+router.post('/join',async (req,res)=>{
+
+    const {id,pw,name,phone} = req.body;
+    try{
+        let result = await Member.create({id,pw,name,phone});
+        let object = result.toObject();
+        delete object.pw; // pw 는 결과값에서 제거하고 보여준다.
+        res.json({'success':true,'data':object});
+    }catch(e){
+        console.error(e, 'CODE :'+e.code);
+
+        let msg = "";
+
+        switch (e.code){
+            case 11000:
+                msg = "이미 사용중인 아이디 입니다.";
+                break;
+
+            default:
+                msg = "필수값을 확인해 주세요.";
+        }
+
+        res.json({'success':false,message:msg});
+    }
+
 });
 
 // 회원리스트(/memeber/list, /member/)
