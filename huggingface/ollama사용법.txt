@@ -13,3 +13,6 @@ ollama ps
 # 모델페이지 우측 상단에 use this model 버튼 클릭시 ollama 가 있어야 한다.
 예)
 ollama run hf.co/LGAI-EXAONE/EXAONE-4.5-33B-GGUF:Q4_K_M
+
+# 모델 삭제
+ollama rm [삭제할 모델 이름]
