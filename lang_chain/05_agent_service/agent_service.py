@@ -32,12 +32,21 @@ agent = create_agent(llm,tools=tools, system_prompt=sys_prompt)
 def start_agent(query:str): # 프롬프트 생성 + 대답 듣기
     # stream_mode="updates"  <- 주요 과정이 종료될 때마다 출력
     # stream_mode="messages" <- 타이핑 하듯이 출력(기본값)
-    for chunk in agent.stream({"messages":[("user",query)]}, stream_mode="updates"):
-        print(chunk)
-        if 'model' in chunk:
+    mode = "messages"
+    for chunk in agent.stream({"messages": [("user", query)]}, stream_mode=mode):
+        if mode == 'updates' and 'model' in chunk:
             message = chunk['model']['messages'][-1].content
             #print(message,end="",flush=True)
             yield message
-        
+
+        # stream_mode=messages 로 처리할 경우 chunk 구조가 달라지므로 해당 내용으로 변경해주어야 한다.
+        if mode == 'messages':
+            # print(chunk[0])
+            # chunk 객체 안에 tool_calls 라는 속성이 있으면
+            # 있으면 AIMessage, 없으면 ToolMessage
+            if hasattr(chunk[0],"tool_calls"):
+                text = chunk[0].content
+                if text != '':
+                    yield text
 
 
