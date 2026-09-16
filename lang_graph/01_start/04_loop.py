@@ -45,7 +45,26 @@ def write_node(state:WriteState) -> WriteState:
 
 def critic_node(state:WriteState) -> WriteState:
     """카피를 검증하고 승인여부와 피드백을 반환하는 노드"""
+    # 합격조건 : 혁신 또는 미래라는 키워드가 반드시 들어가야 함
+    prompt = f"""
+        당신은 깐깐한 카피라이트 검수자 입니다. 진부한 카피를 걸러냅니다.
+        다음의 [광고카피]를 평가해주세요.
+        [광고카피] : {state.draft}
 
+        [합격조건]
+        1. 카피 내 '혁신' 또는 '미래' 라는 키워드가 반드시 포함되어야 함
+        2. 미래 지향적인 내용이어야 함
+
+        [출력조건]
+        다른 설명 필요없이 아래 형태의 JSON 포맷으로 응답해야함
+        ``` 등의 JSON 에 불필요한 문자는 모두 제외
+        {{
+        "state":"오직 PASS 또는 RETRY 만 표기",
+        "feedback":"state 가 RETRY 일 경우 조건을 만족하지 못하는 이유, PASS 일 경우 칭찬"
+        }}
+    """  # 중괄호 2겹으로 한 이유는 변수로 인식하지 않고 문자열로 인식하도록 하기 위함
+    resp = llm.invoke(prompt)
+    print(resp.content)  # JSON 형태만 깔끔하게 잘 나오는지 확인
     return state
 
 def route_by_review(state:WriteState) -> str:
@@ -57,10 +76,12 @@ wf = StateGraph(WriteState)
 
 # 5. 노드 등록
 wf.add_node('writer',write_node)
+wf.add_node('critic',critic_node)
 
 # 6. 엣지 등록(조립)
 wf.set_entry_point('writer')
-wf.add_edge('writer',END) # END는 ctrl+space 하여 자동완성 선택(langgraph)
+wf.add_edge('writer','critic')
+wf.add_edge('critic',END) # END는 ctrl+space 하여 자동완성 선택(langgraph)
 
 # 7. 컴파일
 app = wf.compile()
