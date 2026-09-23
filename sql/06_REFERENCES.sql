@@ -113,6 +113,43 @@ DESC child_table;
 DELETE FROM parent_table WHERE user_id = 'user01';
 
 
+-- 2. 유니크 제약 조건 (중복을 허용하지 않는 제약조건)
+-- 테이블에 여러개 존재 가능
+-- 유니크 + NOT NULL = 기본키
+-- 유니크 제약조건(유니크 키)는 언제든지 기본키가 될 준비가 되어 있다.
+-- ALTER TABLE [테이블명] ADD CONSTRAINT [제약조건명](컬럼)
+ALTER TABLE child_table ADD CONSTRAINT UNIQUE (order_id);
+
+SELECT * FROM child_table;
+DESC child_table;
+
+-- 3. 체크제약 조건 (80~90년대 만들어진 소스의 경우 가끔 있다.)
+-- 특정한 조건이 맞을 경우 입력시켜 준다.
+-- ALTER TABLE [테이블명] ADD CONSTRAINT CHECK (조건)
+-- 물품 가격이 5000~10000원 사이만 받겠다. 아니면 에러
+ALTER TABLE child_table ADD CONSTRAINT CHECK (price between 5000 and 10000);
+-- 단점 1. 체크제약조건이 걸려있는지 확인이 어렵다.
+DESC child_table; -- 체크제약조건 확인불가
+SELECT * FROM information_schema.CHECK_CONSTRAINTS cc;
+INSERT INTO  child_table VALUES(4,'user02','신발',10000,1); -- 성공
+-- 단점 2. 에러 발생시 원인파악이 쉽지 않다.
+INSERT INTO  child_table VALUES(4,'user02','신발',11000,1); -- 에러: 체크제약조건 위반인지 알 수 없음
+-- 단점 3. 조건 변경시 테이블 구조(속성)를 변경해야 한다.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
